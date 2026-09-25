@@ -6,7 +6,7 @@ Registro de gastos diarios y mensuales. Sin base de datos: todo se guarda en `lo
 
 - Vite + React + TypeScript
 - Tailwind CSS v4
-- Recharts (gráficos), date-fns (fechas)
+- Recharts (gráficos), date-fns (fechas), Framer Motion (animaciones)
 
 ## Uso
 
@@ -24,6 +24,8 @@ npm run build   # genera dist/ (sitio estático)
 - Gráfico de gasto por día y distribución por categoría
 - Moneda configurable
 - Cuatro temas: Oscuro (por defecto), Claro, Azul espacial y Bosque nocturno (la preferencia se guarda)
+- Layout tipo bento grid con efectos de iluminación (glow) por tema
+- Animaciones de entrada escalonadas y transiciones al agregar/eliminar gastos (respetan `prefers-reduced-motion`)
 - Exportar a JSON/CSV e importar JSON (respaldo de los datos)
 
 El despliegue es estático: sube la carpeta `dist/` a Vercel, Netlify o GitHub Pages.

@@ -7,7 +7,7 @@ type Props = {
 }
 
 const inputClass =
-  'h-10 rounded-lg border border-line bg-app px-3 text-sm text-fg outline-none transition focus:border-accent'
+  'glow-focus h-10 rounded-lg border border-line bg-app px-3 text-sm text-fg outline-none transition'
 
 export function ExpenseForm({ onAdd }: Props) {
   const [amount, setAmount] = useState('')
@@ -81,13 +81,13 @@ export function ExpenseForm({ onAdd }: Props) {
         <span className="hidden text-xs sm:block">&nbsp;</span>
         <button
           type="submit"
-          className="h-10 rounded-lg bg-accent px-5 text-sm font-medium text-accent-fg transition hover:opacity-85"
+          className="glow-accent h-10 rounded-lg bg-accent px-5 text-sm font-medium text-accent-fg transition hover:opacity-85"
         >
           Agregar
         </button>
       </div>
 
-      {error && <p className="text-sm text-danger sm:col-span-5">{error}</p>}
+      {error && <p className="animate-rise text-sm text-danger sm:col-span-5">{error}</p>}
     </form>
   )
 }

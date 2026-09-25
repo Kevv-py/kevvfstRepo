@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { formatDayLabel, formatMoney, groupByDay, sum } from '../lib/expenses'
 import { CATEGORY_COLORS, type Currency, type Expense } from '../types'
 
@@ -11,7 +12,7 @@ export function ExpenseList({ expenses, currency, onDelete }: Props) {
   const days = groupByDay(expenses)
 
   if (days.length === 0) {
-    return <p className="py-14 text-center text-sm text-muted">Aún no hay gastos en este mes</p>
+    return <p className="animate-rise py-14 text-center text-sm text-muted">Aún no hay gastos en este mes</p>
   }
 
   return (
@@ -24,10 +25,19 @@ export function ExpenseList({ expenses, currency, onDelete }: Props) {
           </header>
 
           <ul className="grid gap-1">
-            {items.map((expense) => (
-              <li key={expense.id} className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-hover">
+            <AnimatePresence initial={false}>
+            {items.map((expense, position) => (
+              <motion.li
+                key={expense.id}
+                layout
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10, height: 0, marginBottom: 0 }}
+                transition={{ duration: 0.28, delay: position * 0.03, ease: [0.22, 1, 0.36, 1] }}
+                className="group flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-hover"
+              >
                 <span
-                  className="size-2.5 shrink-0 rounded-full"
+                  className="glow-accent size-2.5 shrink-0 rounded-full"
                   style={{ background: CATEGORY_COLORS[expense.category] ?? '#64748b' }}
                 />
                 <div className="min-w-0">
@@ -45,8 +55,9 @@ export function ExpenseList({ expenses, currency, onDelete }: Props) {
                 >
                   Eliminar
                 </button>
-              </li>
+              </motion.li>
             ))}
+            </AnimatePresence>
           </ul>
         </section>
       ))}
