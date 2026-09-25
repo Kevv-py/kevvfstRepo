@@ -1,5 +1,7 @@
 import { addMonths, format, parseISO } from 'date-fns'
+import { motion } from 'framer-motion'
 import { useMemo, useRef, useState } from 'react'
+import { BentoCard, BentoGrid } from './components/Bento'
 import { CategoryChart, DailyChart } from './components/Charts'
 import { ExpenseForm } from './components/ExpenseForm'
 import { ExpenseList } from './components/ExpenseList'
@@ -14,13 +16,19 @@ import {
   todayISO,
 } from './lib/expenses'
 import { useLocalStorage } from './lib/useLocalStorage'
+import { THEMES, useTheme, type Theme } from './lib/useTheme'
 import { CURRENCIES, type Currency, type Expense } from './types'
+
+const surface = 'glow rounded-lg border border-line bg-surface'
+const selectClass = `glow-focus h-9 px-2 text-sm outline-none transition ${surface}`
+const buttonClass = `glow-hover px-3 py-2 transition hover:bg-hover ${surface}`
 
 export default function App() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('gastos:expenses', [])
   const [currency, setCurrency] = useLocalStorage<Currency>('gastos:currency', 'PEN')
   const [budget, setBudget] = useLocalStorage<number>('gastos:budget', 0)
   const [month, setMonth] = useState(() => monthKey(todayISO()))
+  const { theme, setTheme } = useTheme()
   const fileInput = useRef<HTMLInputElement>(null)
 
   const monthExpenses = useMemo(
@@ -54,15 +62,20 @@ export default function App() {
   }
 
   return (
-    <div className="mx-auto grid max-w-3xl gap-6 px-4 py-8 sm:py-12">
-      <header className="flex flex-wrap items-center gap-3">
+    <div className="mx-auto grid max-w-5xl gap-4 px-4 py-8 sm:py-12">
+      <motion.header
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-wrap items-center gap-3"
+      >
         <h1 className="text-xl font-semibold tracking-tight">Mis gastos</h1>
-        <div className="ml-auto flex items-center gap-1 rounded-lg border border-neutral-200 bg-white p-1">
+        <div className={`ml-auto flex items-center gap-1 p-1 ${surface}`}>
           <button
             type="button"
             onClick={() => shiftMonth(-1)}
             aria-label="Mes anterior"
-            className="size-7 rounded-md text-neutral-500 transition hover:bg-neutral-100"
+            className="size-7 rounded-md text-muted transition hover:bg-hover"
           >
             ‹
           </button>
@@ -71,16 +84,28 @@ export default function App() {
             type="button"
             onClick={() => shiftMonth(1)}
             aria-label="Mes siguiente"
-            className="size-7 rounded-md text-neutral-500 transition hover:bg-neutral-100"
+            className="size-7 rounded-md text-muted transition hover:bg-hover"
           >
             ›
           </button>
         </div>
         <select
+          value={theme}
+          onChange={(event) => setTheme(event.target.value as Theme)}
+          aria-label="Tema"
+          className={selectClass}
+        >
+          {THEMES.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+        <select
           value={currency}
           onChange={(event) => setCurrency(event.target.value as Currency)}
           aria-label="Moneda"
-          className="h-9 rounded-lg border border-neutral-200 bg-white px-2 text-sm outline-none focus:border-neutral-900"
+          className={selectClass}
         >
           {CURRENCIES.map((item) => (
             <option key={item} value={item}>
@@ -88,81 +113,97 @@ export default function App() {
             </option>
           ))}
         </select>
-      </header>
+      </motion.header>
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        <Card label="Total del mes" value={formatMoney(monthTotal, currency)} />
-        <Card label="Hoy" value={formatMoney(todayTotal, currency)} />
-        <Card label="Promedio por día activo" value={formatMoney(dailyAverage, currency)} />
-      </section>
-
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
-        <ExpenseForm onAdd={addExpense} />
-      </section>
-
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
-        <div className="mb-3 flex flex-wrap items-center gap-3">
-          <h2 className="text-sm font-medium text-neutral-500">Presupuesto mensual</h2>
-          <input
-            value={budget === 0 ? '' : budget}
-            onChange={(event) => setBudget(Number(event.target.value.replace(',', '.')) || 0)}
-            inputMode="decimal"
-            placeholder="Sin definir"
-            className="h-9 w-32 rounded-lg border border-neutral-200 px-3 text-sm outline-none focus:border-neutral-900"
-          />
-          {budget > 0 && (
-            <span className="text-sm text-neutral-500">
-              Quedan <strong className={monthTotal > budget ? 'text-red-600' : 'text-neutral-900'}>
-                {formatMoney(budget - monthTotal, currency)}
-              </strong>
-            </span>
-          )}
-        </div>
-        {budget > 0 && (
-          <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
-            <div
-              className={`h-full rounded-full transition-all ${monthTotal > budget ? 'bg-red-500' : 'bg-neutral-900'}`}
-              style={{ width: `${Math.min(100, (monthTotal / budget) * 100)}%` }}
-            />
+      <BentoGrid>
+        <BentoCard index={0} className="flex flex-col lg:col-span-3 lg:row-span-2">
+          <p className="text-xs font-medium text-muted">Total del mes</p>
+          <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight sm:text-5xl">
+            {formatMoney(monthTotal, currency)}
+          </p>
+          <p className="mt-2 text-xs text-muted">
+            {monthExpenses.length} {monthExpenses.length === 1 ? 'registro' : 'registros'} ·{' '}
+            {daysWithExpenses} {daysWithExpenses === 1 ? 'día' : 'días'} con gasto
+          </p>
+          <div className="mt-auto border-t border-line pt-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-xs font-medium text-muted">Presupuesto mensual</span>
+              <input
+                value={budget === 0 ? '' : budget}
+                onChange={(event) => setBudget(Number(event.target.value.replace(',', '.')) || 0)}
+                inputMode="decimal"
+                placeholder="Sin definir"
+                className="glow-focus h-9 w-32 rounded-lg border border-line bg-app px-3 text-sm outline-none transition"
+              />
+              {budget > 0 && (
+                <span className="text-sm text-muted">
+                  Quedan{' '}
+                  <strong className={monthTotal > budget ? 'text-danger' : 'text-fg'}>
+                    {formatMoney(budget - monthTotal, currency)}
+                  </strong>
+                </span>
+              )}
+            </div>
+            {budget > 0 && (
+              <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-hover">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(100, (monthTotal / budget) * 100)}%` }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  className={`glow-accent h-full rounded-full ${monthTotal > budget ? 'bg-danger' : 'bg-accent'}`}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </section>
+        </BentoCard>
 
-      <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-medium text-neutral-500">Gasto diario</h2>
-        <DailyChart expenses={monthExpenses} month={month} currency={currency} />
-      </section>
+        <BentoCard index={1} className="lg:col-span-3">
+          <p className="text-xs font-medium text-muted">Hoy</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
+            {formatMoney(todayTotal, currency)}
+          </p>
+        </BentoCard>
 
-      <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-medium text-neutral-500">Por categoría</h2>
-        <CategoryChart expenses={monthExpenses} currency={currency} />
-      </section>
+        <BentoCard index={2} className="lg:col-span-3">
+          <p className="text-xs font-medium text-muted">Promedio por día activo</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">
+            {formatMoney(dailyAverage, currency)}
+          </p>
+        </BentoCard>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-medium text-neutral-500">Registros</h2>
-        <ExpenseList expenses={monthExpenses} currency={currency} onDelete={deleteExpense} />
-      </section>
+        <BentoCard index={3} className="sm:col-span-2 lg:col-span-6">
+          <ExpenseForm onAdd={addExpense} />
+        </BentoCard>
+
+        <BentoCard index={4} title="Gasto diario" className="sm:col-span-2 lg:col-span-4">
+          <DailyChart expenses={monthExpenses} month={month} currency={currency} theme={theme} />
+        </BentoCard>
+
+        <BentoCard index={5} title="Por categoría" className="sm:col-span-2 lg:col-span-2">
+          <CategoryChart expenses={monthExpenses} currency={currency} theme={theme} />
+        </BentoCard>
+
+        <BentoCard index={6} title="Registros" className="sm:col-span-2 lg:col-span-6">
+          <ExpenseList expenses={monthExpenses} currency={currency} onDelete={deleteExpense} />
+        </BentoCard>
+      </BentoGrid>
 
       <footer className="flex flex-wrap items-center gap-2 pb-6 text-sm">
         <button
           type="button"
           onClick={() => download('gastos.json', JSON.stringify(expenses, null, 2), 'application/json')}
-          className="rounded-lg border border-neutral-200 bg-white px-3 py-2 transition hover:bg-neutral-100"
+          className={buttonClass}
         >
           Exportar JSON
         </button>
         <button
           type="button"
           onClick={() => download('gastos.csv', toCSV(expenses), 'text/csv')}
-          className="rounded-lg border border-neutral-200 bg-white px-3 py-2 transition hover:bg-neutral-100"
+          className={buttonClass}
         >
           Exportar CSV
         </button>
-        <button
-          type="button"
-          onClick={() => fileInput.current?.click()}
-          className="rounded-lg border border-neutral-200 bg-white px-3 py-2 transition hover:bg-neutral-100"
-        >
+        <button type="button" onClick={() => fileInput.current?.click()} className={buttonClass}>
           Importar JSON
         </button>
         <input
@@ -176,17 +217,8 @@ export default function App() {
             event.target.value = ''
           }}
         />
-        <span className="ml-auto text-xs text-neutral-400">Los datos se guardan solo en este navegador</span>
+        <span className="ml-auto text-xs text-muted">Los datos se guardan solo en este navegador</span>
       </footer>
-    </div>
-  )
-}
-
-function Card({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4">
-      <p className="text-xs font-medium text-neutral-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{value}</p>
     </div>
   )
 }
