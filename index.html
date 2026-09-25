@@ -11,8 +11,8 @@
     <script>
       try {
         const theme = JSON.parse(localStorage.getItem('gastos:theme')) ?? 'dark'
-        document.documentElement.classList.toggle('dark', theme === 'dark')
-        document.documentElement.style.colorScheme = theme
+        document.documentElement.dataset.theme = theme
+        document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark'
       } catch {}
     </script>
   </head>

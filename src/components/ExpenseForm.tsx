@@ -7,7 +7,7 @@ type Props = {
 }
 
 const inputClass =
-  'h-10 rounded-lg border border-neutral-200 bg-white px-3 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-900 dark:focus:border-neutral-400'
+  'h-10 rounded-lg border border-line bg-app px-3 text-sm text-fg outline-none transition focus:border-accent'
 
 export function ExpenseForm({ onAdd }: Props) {
   const [amount, setAmount] = useState('')
@@ -36,7 +36,7 @@ export function ExpenseForm({ onAdd }: Props) {
   return (
     <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-[1fr_1fr_1.4fr_1fr_auto]">
       <label className="grid gap-1">
-        <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Monto</span>
+        <span className="text-xs font-medium text-muted">Monto</span>
         <input
           value={amount}
           onChange={(event) => setAmount(event.target.value)}
@@ -47,7 +47,7 @@ export function ExpenseForm({ onAdd }: Props) {
       </label>
 
       <label className="grid gap-1">
-        <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Categoría</span>
+        <span className="text-xs font-medium text-muted">Categoría</span>
         <select value={category} onChange={(event) => setCategory(event.target.value)} className={inputClass}>
           {CATEGORIES.map((item) => (
             <option key={item} value={item}>
@@ -58,7 +58,7 @@ export function ExpenseForm({ onAdd }: Props) {
       </label>
 
       <label className="grid gap-1">
-        <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Nota</span>
+        <span className="text-xs font-medium text-muted">Nota</span>
         <input
           value={note}
           onChange={(event) => setNote(event.target.value)}
@@ -68,7 +68,7 @@ export function ExpenseForm({ onAdd }: Props) {
       </label>
 
       <label className="grid gap-1">
-        <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Fecha</span>
+        <span className="text-xs font-medium text-muted">Fecha</span>
         <input
           type="date"
           value={date}
@@ -81,13 +81,13 @@ export function ExpenseForm({ onAdd }: Props) {
         <span className="hidden text-xs sm:block">&nbsp;</span>
         <button
           type="submit"
-          className="h-10 rounded-lg bg-neutral-900 px-5 text-sm font-medium text-white transition hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+          className="h-10 rounded-lg bg-accent px-5 text-sm font-medium text-accent-fg transition hover:opacity-85"
         >
           Agregar
         </button>
       </div>
 
-      {error && <p className="text-sm text-red-600 sm:col-span-5 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-danger sm:col-span-5">{error}</p>}
     </form>
   )
 }

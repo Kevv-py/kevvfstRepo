@@ -11,33 +11,28 @@ export function ExpenseList({ expenses, currency, onDelete }: Props) {
   const days = groupByDay(expenses)
 
   if (days.length === 0) {
-    return <p className="py-14 text-center text-sm text-neutral-400 dark:text-neutral-500">Aún no hay gastos en este mes</p>
+    return <p className="py-14 text-center text-sm text-muted">Aún no hay gastos en este mes</p>
   }
 
   return (
     <div className="grid gap-6">
       {days.map(([date, items]) => (
         <section key={date} className="grid gap-2">
-          <header className="flex items-baseline justify-between border-b border-neutral-100 pb-1 dark:border-neutral-800">
-            <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{formatDayLabel(date)}</h3>
+          <header className="flex items-baseline justify-between border-b border-line pb-1">
+            <h3 className="text-sm font-medium text-muted">{formatDayLabel(date)}</h3>
             <span className="text-sm font-semibold tabular-nums">{formatMoney(sum(items), currency)}</span>
           </header>
 
           <ul className="grid gap-1">
             {items.map((expense) => (
-              <li
-                key={expense.id}
-                className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-neutral-50 dark:hover:bg-neutral-800/60"
-              >
+              <li key={expense.id} className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-hover">
                 <span
                   className="size-2.5 shrink-0 rounded-full"
                   style={{ background: CATEGORY_COLORS[expense.category] ?? '#64748b' }}
                 />
                 <div className="min-w-0">
                   <p className="truncate text-sm">{expense.note || expense.category}</p>
-                  {expense.note && (
-                    <p className="truncate text-xs text-neutral-400 dark:text-neutral-500">{expense.category}</p>
-                  )}
+                  {expense.note && <p className="truncate text-xs text-muted">{expense.category}</p>}
                 </div>
                 <span className="ml-auto text-sm font-medium tabular-nums">
                   {formatMoney(expense.amount, currency)}
@@ -46,7 +41,7 @@ export function ExpenseList({ expenses, currency, onDelete }: Props) {
                   type="button"
                   onClick={() => onDelete(expense.id)}
                   aria-label="Eliminar gasto"
-                  className="rounded-md px-2 py-1 text-xs text-neutral-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus:opacity-100 dark:text-neutral-500 dark:hover:bg-red-950/50 dark:hover:text-red-400"
+                  className="rounded-md px-2 py-1 text-xs text-muted opacity-0 transition group-hover:opacity-100 hover:text-danger focus:opacity-100"
                 >
                   Eliminar
                 </button>

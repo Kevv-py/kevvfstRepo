@@ -23,7 +23,7 @@ npm run build   # genera dist/ (sitio estático)
 - Presupuesto mensual con barra de progreso
 - Gráfico de gasto por día y distribución por categoría
 - Moneda configurable
-- Modo oscuro/claro con selector (se guarda la preferencia)
+- Cuatro temas: Oscuro (por defecto), Claro, Azul espacial y Bosque nocturno (la preferencia se guarda)
 - Exportar a JSON/CSV e importar JSON (respaldo de los datos)
 
 El despliegue es estático: sube la carpeta `dist/` a Vercel, Netlify o GitHub Pages.
