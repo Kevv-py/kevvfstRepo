@@ -14,13 +14,19 @@ import {
   todayISO,
 } from './lib/expenses'
 import { useLocalStorage } from './lib/useLocalStorage'
+import { useTheme } from './lib/useTheme'
 import { CURRENCIES, type Currency, type Expense } from './types'
+
+const surface = 'border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900'
+const headingClass = 'text-sm font-medium text-neutral-500 dark:text-neutral-400'
+const buttonClass = `rounded-lg px-3 py-2 transition hover:bg-neutral-100 dark:hover:bg-neutral-800 ${surface}`
 
 export default function App() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('gastos:expenses', [])
   const [currency, setCurrency] = useLocalStorage<Currency>('gastos:currency', 'PEN')
   const [budget, setBudget] = useLocalStorage<number>('gastos:budget', 0)
   const [month, setMonth] = useState(() => monthKey(todayISO()))
+  const { theme, toggle: toggleTheme } = useTheme()
   const fileInput = useRef<HTMLInputElement>(null)
 
   const monthExpenses = useMemo(
@@ -57,12 +63,12 @@ export default function App() {
     <div className="mx-auto grid max-w-3xl gap-6 px-4 py-8 sm:py-12">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold tracking-tight">Mis gastos</h1>
-        <div className="ml-auto flex items-center gap-1 rounded-lg border border-neutral-200 bg-white p-1">
+        <div className={`ml-auto flex items-center gap-1 rounded-lg p-1 ${surface}`}>
           <button
             type="button"
             onClick={() => shiftMonth(-1)}
             aria-label="Mes anterior"
-            className="size-7 rounded-md text-neutral-500 transition hover:bg-neutral-100"
+            className="size-7 rounded-md text-neutral-500 transition hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
             ‹
           </button>
@@ -71,16 +77,26 @@ export default function App() {
             type="button"
             onClick={() => shiftMonth(1)}
             aria-label="Mes siguiente"
-            className="size-7 rounded-md text-neutral-500 transition hover:bg-neutral-100"
+            className="size-7 rounded-md text-neutral-500 transition hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
             ›
           </button>
         </div>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+          className={`flex h-9 items-center gap-2 rounded-lg px-3 text-sm transition hover:bg-neutral-100 dark:hover:bg-neutral-800 ${surface}`}
+        >
+          <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
+          {theme === 'dark' ? 'Claro' : 'Oscuro'}
+        </button>
         <select
           value={currency}
           onChange={(event) => setCurrency(event.target.value as Currency)}
           aria-label="Moneda"
-          className="h-9 rounded-lg border border-neutral-200 bg-white px-2 text-sm outline-none focus:border-neutral-900"
+          className={`h-9 rounded-lg px-2 text-sm outline-none focus:border-neutral-900 dark:focus:border-neutral-400 ${surface}`}
         >
           {CURRENCIES.map((item) => (
             <option key={item} value={item}>
@@ -96,50 +112,57 @@ export default function App() {
         <Card label="Promedio por día activo" value={formatMoney(dailyAverage, currency)} />
       </section>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
+      <section className={`rounded-xl p-4 ${surface}`}>
         <ExpenseForm onAdd={addExpense} />
       </section>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
+      <section className={`rounded-xl p-4 ${surface}`}>
         <div className="mb-3 flex flex-wrap items-center gap-3">
-          <h2 className="text-sm font-medium text-neutral-500">Presupuesto mensual</h2>
+          <h2 className={headingClass}>Presupuesto mensual</h2>
           <input
             value={budget === 0 ? '' : budget}
             onChange={(event) => setBudget(Number(event.target.value.replace(',', '.')) || 0)}
             inputMode="decimal"
             placeholder="Sin definir"
-            className="h-9 w-32 rounded-lg border border-neutral-200 px-3 text-sm outline-none focus:border-neutral-900"
+            className="h-9 w-32 rounded-lg border border-neutral-200 px-3 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-900 dark:focus:border-neutral-400"
           />
           {budget > 0 && (
-            <span className="text-sm text-neutral-500">
-              Quedan <strong className={monthTotal > budget ? 'text-red-600' : 'text-neutral-900'}>
+            <span className="text-sm text-neutral-500 dark:text-neutral-400">
+              Quedan{' '}
+              <strong
+                className={
+                  monthTotal > budget ? 'text-red-600 dark:text-red-400' : 'text-neutral-900 dark:text-neutral-100'
+                }
+              >
                 {formatMoney(budget - monthTotal, currency)}
               </strong>
             </span>
           )}
         </div>
         {budget > 0 && (
-          <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
             <div
-              className={`h-full rounded-full transition-all ${monthTotal > budget ? 'bg-red-500' : 'bg-neutral-900'}`}
+              className={`h-full rounded-full transition-all ${
+                monthTotal > budget ? 'bg-red-500' : 'bg-neutral-900 dark:bg-neutral-100'
+              }`}
               style={{ width: `${Math.min(100, (monthTotal / budget) * 100)}%` }}
             />
           </div>
         )}
       </section>
 
-      <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-medium text-neutral-500">Gasto diario</h2>
-        <DailyChart expenses={monthExpenses} month={month} currency={currency} />
+      <section className={`grid gap-4 rounded-xl p-4 ${surface}`}>
+        <h2 className={headingClass}>Gasto diario</h2>
+        <DailyChart expenses={monthExpenses} month={month} currency={currency} theme={theme} />
       </section>
 
-      <section className="grid gap-4 rounded-xl border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-medium text-neutral-500">Por categoría</h2>
-        <CategoryChart expenses={monthExpenses} currency={currency} />
+      <section className={`grid gap-4 rounded-xl p-4 ${surface}`}>
+        <h2 className={headingClass}>Por categoría</h2>
+        <CategoryChart expenses={monthExpenses} currency={currency} theme={theme} />
       </section>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-4">
-        <h2 className="mb-3 text-sm font-medium text-neutral-500">Registros</h2>
+      <section className={`rounded-xl p-4 ${surface}`}>
+        <h2 className={`mb-3 ${headingClass}`}>Registros</h2>
         <ExpenseList expenses={monthExpenses} currency={currency} onDelete={deleteExpense} />
       </section>
 
@@ -147,21 +170,21 @@ export default function App() {
         <button
           type="button"
           onClick={() => download('gastos.json', JSON.stringify(expenses, null, 2), 'application/json')}
-          className="rounded-lg border border-neutral-200 bg-white px-3 py-2 transition hover:bg-neutral-100"
+          className={buttonClass}
         >
           Exportar JSON
         </button>
         <button
           type="button"
           onClick={() => download('gastos.csv', toCSV(expenses), 'text/csv')}
-          className="rounded-lg border border-neutral-200 bg-white px-3 py-2 transition hover:bg-neutral-100"
+          className={buttonClass}
         >
           Exportar CSV
         </button>
         <button
           type="button"
           onClick={() => fileInput.current?.click()}
-          className="rounded-lg border border-neutral-200 bg-white px-3 py-2 transition hover:bg-neutral-100"
+          className={buttonClass}
         >
           Importar JSON
         </button>
@@ -176,7 +199,9 @@ export default function App() {
             event.target.value = ''
           }}
         />
-        <span className="ml-auto text-xs text-neutral-400">Los datos se guardan solo en este navegador</span>
+        <span className="ml-auto text-xs text-neutral-400 dark:text-neutral-500">
+          Los datos se guardan solo en este navegador
+        </span>
       </footer>
     </div>
   )
@@ -184,8 +209,8 @@ export default function App() {
 
 function Card({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4">
-      <p className="text-xs font-medium text-neutral-500">{label}</p>
+    <div className={`rounded-xl p-4 ${surface}`}>
+      <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight">{value}</p>
     </div>
   )

@@ -11,15 +11,31 @@ import {
   YAxis,
 } from 'recharts'
 import { formatMoney, totalsByCategory } from '../lib/expenses'
+import type { Theme } from '../lib/useTheme'
 import { CATEGORY_COLORS, type Currency, type Expense } from '../types'
 
 type Props = {
   expenses: Expense[]
   month: string
   currency: Currency
+  theme: Theme
 }
 
-export function DailyChart({ expenses, month, currency }: Props) {
+function tooltipStyle(theme: Theme) {
+  const dark = theme === 'dark'
+  return {
+    contentStyle: {
+      background: dark ? '#171717' : '#ffffff',
+      border: `1px solid ${dark ? '#404040' : '#e5e5e5'}`,
+      borderRadius: 8,
+      fontSize: 12,
+    },
+    labelStyle: { color: dark ? '#e5e5e5' : '#171717' },
+    itemStyle: { color: dark ? '#e5e5e5' : '#171717' },
+  }
+}
+
+export function DailyChart({ expenses, month, currency, theme }: Props) {
   const days = getDaysInMonth(parseISO(`${month}-01`))
   const totals = new Map<number, number>()
   for (const expense of expenses) {
@@ -37,21 +53,22 @@ export function DailyChart({ expenses, month, currency }: Props) {
         <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={11} stroke="#a3a3a3" interval={2} />
         <YAxis tickLine={false} axisLine={false} fontSize={11} stroke="#a3a3a3" width={48} />
         <Tooltip
-          cursor={{ fill: '#f5f5f5' }}
+          {...tooltipStyle(theme)}
+          cursor={{ fill: theme === 'dark' ? '#262626' : '#f5f5f5' }}
           formatter={(value) => [formatMoney(Number(value), currency), 'Gasto']}
           labelFormatter={(label) => `Día ${String(label)}`}
         />
-        <Bar dataKey="total" fill="#171717" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="total" fill={theme === 'dark' ? '#e5e5e5' : '#171717'} radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )
 }
 
-export function CategoryChart({ expenses, currency }: Omit<Props, 'month'>) {
+export function CategoryChart({ expenses, currency, theme }: Omit<Props, 'month'>) {
   const data = totalsByCategory(expenses)
 
   if (data.length === 0) {
-    return <p className="py-14 text-center text-sm text-neutral-400">Sin datos para este mes</p>
+    return <p className="py-14 text-center text-sm text-neutral-400 dark:text-neutral-500">Sin datos para este mes</p>
   }
 
   return (
@@ -63,7 +80,7 @@ export function CategoryChart({ expenses, currency }: Omit<Props, 'month'>) {
               <Cell key={entry.category} fill={CATEGORY_COLORS[entry.category] ?? '#64748b'} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => formatMoney(Number(value), currency)} />
+          <Tooltip {...tooltipStyle(theme)} formatter={(value) => formatMoney(Number(value), currency)} />
         </PieChart>
       </ResponsiveContainer>
 
@@ -74,7 +91,7 @@ export function CategoryChart({ expenses, currency }: Omit<Props, 'month'>) {
               className="size-2.5 rounded-full"
               style={{ background: CATEGORY_COLORS[entry.category] ?? '#64748b' }}
             />
-            <span className="text-neutral-600">{entry.category}</span>
+            <span className="text-neutral-600 dark:text-neutral-300">{entry.category}</span>
             <span className="ml-auto font-medium tabular-nums">{formatMoney(entry.total, currency)}</span>
           </li>
         ))}
