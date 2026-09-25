@@ -19,7 +19,7 @@ export function BentoCard({ children, className = '', index = 0, title, action }
       initial={{ opacity: 0, y: 16, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.45, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      className={`glow glow-hover rounded-2xl border border-line bg-surface p-4 ${className}`}
+      className={`glow glow-hover @container min-w-0 rounded-2xl border border-line bg-surface p-4 ${className}`}
     >
       {(title || action) && (
         <div className="mb-3 flex flex-wrap items-center gap-3">
